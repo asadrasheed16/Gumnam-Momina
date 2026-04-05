@@ -1,0 +1,28 @@
+$path = "src\app\products\[id]\page.js"
+$c = Get-Content -LiteralPath $path -Raw
+$c = $c -replace 'text-plum/70', 'text-[#4A2E20]'
+$c = $c -replace 'text-plum/60', 'text-[#6B4A3A]'
+$c = $c -replace 'text-plum/55', 'text-[#6B4A3A]'
+$c = $c -replace 'text-plum/50', 'text-[#8A6A58]'
+$c = $c -replace 'text-plum/40', 'text-[#A8907E]'
+$c = $c -replace 'text-plum', 'text-[#2D1810]'
+$c = $c -replace 'font-nunito', 'font-dm'
+$c = $c -replace 'font-cormorant', 'font-playfair'
+$c = $c -replace 'text-rose-dark', 'text-[#D4760A]'
+$c = $c -replace 'hover:text-rose-dark', 'hover:text-[#D4760A]'
+$c = $c -replace 'border-dustpink/50', 'border-[rgba(212,118,10,0.18)]'
+$c = $c -replace 'border-dustpink/40', 'border-[rgba(212,118,10,0.15)]'
+$c = $c -replace 'border-dustpink/30', 'border-[rgba(212,118,10,0.12)]'
+$c = $c -replace 'border-dustpink', 'border-[rgba(212,118,10,0.15)]'
+$c = $c -replace 'bg-blush-100', 'bg-[rgba(212,118,10,0.08)]'
+$c = $c -replace 'bg-blush-50', 'bg-[rgba(212,118,10,0.04)]'
+$c = $c -replace 'hover:bg-blush-50', 'hover:bg-[rgba(212,118,10,0.04)]'
+$c = $c -replace 'border-rose/50', 'border-[rgba(212,118,10,0.30)]'
+$c = $c -replace 'border-rose ', 'border-[#D4760A] '
+$c = $c -replace 'hover:border-rose/50', 'hover:border-[rgba(212,118,10,0.30)]'
+$c = $c -replace 'hover:border-rose', 'hover:border-[#D4760A]'
+$c = $c -replace 'bg-roseSoft', 'bg-[rgba(212,118,10,0.06)]'
+$c = $c -replace 'bg-rose-pale', 'bg-[#E89830]'
+$c = $c -replace '#E8486A', '#D4760A'
+Set-Content -LiteralPath $path -Value $c -NoNewline
+Write-Host "Product detail page fixed!"
