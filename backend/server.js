@@ -25,6 +25,7 @@ app.use('/api/cart',     require('./routes/cart'));
 app.use('/api/orders',   require('./routes/orders'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/users',    require('./routes/users'));
+app.use('/api/chatbot',  require('./routes/chatbot'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'Gumnam Momina API running ✨' }));
 

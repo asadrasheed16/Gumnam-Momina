@@ -1,22 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
     const { recipientName, occasion, senderName } = await req.json();
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey)
+      return NextResponse.json(
+        { error: "API key not configured" },
+        { status: 500 },
+      );
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
-        system: `Generate a personalized Islamic gift card for a luxury Pakistani fashion gift. Respond ONLY with valid JSON — no markdown, no backticks, no extra text.
+    const SYSTEM = `Generate a personalized Islamic gift card for a luxury Pakistani fashion gift. Respond ONLY with valid JSON — no markdown, no backticks, no extra text.
 
 JSON schema:
 {
@@ -28,27 +22,42 @@ JSON schema:
   "colorTheme": "one of: rose, gold, mint, lavender"
 }
 
-Match the Arabic verse and dua to the occasion. Keep the personal message warm and authentic — not corporate or generic.`,
-        messages: [{
-          role: 'user',
-          content: `Recipient: ${recipientName}, Occasion: ${occasion}${senderName ? `, From: ${senderName}` : ''}`,
-        }],
+Match the Arabic verse and dua to the occasion. Keep the personal message warm and authentic — not corporate or generic.`;
+
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 500,
+        messages: [
+          { role: "system", content: SYSTEM },
+          {
+            role: "user",
+            content: `Recipient: ${recipientName}, Occasion: ${occasion}${senderName ? `, From: ${senderName}` : ""}`,
+          },
+        ],
       }),
     });
 
     const data = await res.json();
-    const text = data.content?.[0]?.text || '{}';
-    const card = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const text = data.choices?.[0]?.message?.content || "{}";
+    const card = JSON.parse(text.replace(/```json|```/g, "").trim());
     return NextResponse.json({ card });
   } catch (err) {
     return NextResponse.json({
       card: {
-        arabicVerse: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-        transliteration: 'Bismillahir Rahmanir Raheem',
-        translation: 'In the name of Allah, the Most Gracious, the Most Merciful',
-        personalMessage: `Dearest ${recipientName || 'Sister'}, may this gift bring a smile to your beautiful face and warmth to your heart. Wishing you all the khushi and blessings this special occasion brings, mashallah!`,
-        duaLine: 'May Allah fill your days with light, love, and endless blessings. Ameen 🤲',
-        colorTheme: 'rose',
+        arabicVerse: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+        transliteration: "Bismillahir Rahmanir Raheem",
+        translation:
+          "In the name of Allah, the Most Gracious, the Most Merciful",
+        personalMessage: `Dearest ${recipientName || "Sister"}, may this gift bring a smile to your beautiful face and warmth to your heart. Wishing you all the khushi and blessings this special occasion brings, mashallah!`,
+        duaLine:
+          "May Allah fill your days with light, love, and endless blessings. Ameen 🤲",
+        colorTheme: "rose",
       },
     });
   }

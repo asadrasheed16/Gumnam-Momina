@@ -6,7 +6,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-import AIStyleAdvisor from "@/components/AIStyleAdvisor";
+import AIAgent from "@/components/AIAgent";
 
 export const metadata = {
   title: "Gumnam Momina ✿ Luxury Islamic Fashion",
@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
               <CartDrawer />
               <main>{children}</main>
               <Footer />
-              <AIStyleAdvisor />
+              <AIAgent />
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>

@@ -1,22 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
     const { query } = await req.json();
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey)
+      return NextResponse.json(
+        { error: "API key not configured" },
+        { status: 500 },
+      );
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        system: `You are a search assistant for Gumnam Momina, a Pakistani luxury Islamic fashion store.
+    const SYSTEM = `You are a search assistant for Gumnam Momina, a Pakistani luxury Islamic fashion store.
 
 Extract search filters from natural language queries. Respond ONLY with valid JSON — no markdown, no backticks.
 
@@ -41,16 +35,36 @@ Examples:
 - "eid gift for sister" → category: "Gift Sets", featured: true
 - "latest arrivals" → newArrival: true
 - "cheapest hijabs" → category: "Hijab", sort: "price_asc"
-- "best sellers" → sort: "popular", featured: true`,
-        messages: [{ role: 'user', content: query }],
+- "best sellers" → sort: "popular", featured: true`;
+
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 300,
+        messages: [
+          { role: "system", content: SYSTEM },
+          { role: "user", content: query },
+        ],
       }),
     });
 
     const data = await res.json();
-    const text = data.content?.[0]?.text || '{}';
-    const filters = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const text = data.choices?.[0]?.message?.content || "{}";
+    const filters = JSON.parse(text.replace(/```json|```/g, "").trim());
     return NextResponse.json({ filters });
   } catch (err) {
-    return NextResponse.json({ filters: { category: '', sort: 'newest', searchPhrase: query, responseText: 'Showing all products for you! 🌸' } });
+    return NextResponse.json({
+      filters: {
+        category: "",
+        sort: "newest",
+        searchPhrase: query,
+        responseText: "Showing all products for you! 🌸",
+      },
+    });
   }
 }
