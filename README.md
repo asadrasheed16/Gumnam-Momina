@@ -134,44 +134,66 @@ Login as admin and go to `/admin/products`:
 
 ---
 
-## 🌍 Deploy to Vercel (Frontend)
+## 🌍 Production deployment (backend + frontend)
 
-### Step 1: Push to GitHub
-```bash
-# In the frontend folder
-git init
-git add .
-git commit -m "Gumnam Momina Frontend"
-git remote add origin YOUR_GITHUB_REPO_URL
-git push origin main
-```
+Use **one Git repo** for both apps. Do **not** add `vercel.json` at the repo root. The only Vercel config lives in **`frontend/vercel.json`**.
 
-### Step 2: Deploy on Vercel
-1. Go to [vercel.com](https://vercel.com) → New Project
-2. Import your GitHub repo
-3. Set **Root Directory** to `frontend`
-4. Add Environment Variable:
-   - `NEXT_PUBLIC_API_URL` = `https://your-backend-url.com/api`
-5. Click Deploy!
+**Order:** Deploy the **backend** first so you get a public API URL. Then deploy the **frontend** and point it at that URL.
 
 ---
 
-## 🖥️ Deploy Backend (Railway / Render)
+### A — Backend (Railway example)
 
-### Railway (Recommended)
-1. Go to [railway.app](https://railway.app) → New Project
-2. Deploy from GitHub (your backend folder)
-3. Add these environment variables:
-   ```
-   MONGO_URI=your_atlas_uri
-   JWT_SECRET=your_secret_key
-   PORT=5000
-   NODE_ENV=production
-   ```
-4. Railway gives you a URL like `https://your-app.railway.app`
+1. Push this repo to GitHub (if it is not already).
+2. Open [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → select this repo.
+3. When Railway asks for a **root directory**, set it to **`backend`**.
+4. Add a **public HTTP** service if prompted (Railway should detect `npm start` from `backend/package.json`).
+5. In **Variables**, add:
 
-### Then update Vercel:
-- Update `NEXT_PUBLIC_API_URL` to `https://your-app.railway.app/api`
+   | Name | Example / notes |
+   |------|------------------|
+   | `MONGO_URI` | Your [MongoDB Atlas](https://www.mongodb.com/atlas) connection string |
+   | `JWT_SECRET` | A long random string (same idea as local `.env`) |
+   | `NODE_ENV` | `production` |
+   | `ALLOWED_ORIGINS` | Your Vercel site URL(s), comma-separated, e.g. `https://your-app.vercel.app` (add preview URLs if you need them) |
+
+   Railway sets `PORT` automatically; you usually do **not** need to set it.
+
+6. **Deploy**, then open **Settings → Networking → Generate Domain** (or use the default Railway URL).
+7. Confirm the API responds, e.g. open `https://YOUR-RAILWAY-URL.up.railway.app/api/health` in a browser.
+
+Your frontend will use this base (with `/api` on the path):
+
+`NEXT_PUBLIC_API_URL` = `https://YOUR-RAILWAY-URL.up.railway.app/api`
+
+---
+
+### B — Frontend (Vercel)
+
+1. Open [vercel.com](https://vercel.com) → **Add New…** → **Project** → import **the same GitHub repo**.
+2. Under **Root Directory**, choose **`frontend`** (required).
+3. **Environment variables** (Production — add Preview too if you use preview deployments):
+
+   | Name | Value |
+   |------|--------|
+   | `NEXT_PUBLIC_API_URL` | `https://YOUR-RAILWAY-URL.up.railway.app/api` (must match your live API, including `/api`) |
+
+   Optional (only if you use AI features):
+
+   | Name | Notes |
+   |------|--------|
+   | `GROQ_API_KEY` | For Groq-powered routes under `app/api/ai/` |
+   | `ANTHROPIC_API_KEY` | For Claude-related routes |
+
+4. **Deploy**. Your site will be something like `https://your-project.vercel.app`.
+
+5. Go back to Railway and **update `ALLOWED_ORIGINS`** to include your real Vercel URL (and redeploy the backend if needed).
+
+---
+
+### Render (backend alternative)
+
+Same idea: create a **Web Service**, root directory **`backend`**, build command `npm install`, start command `npm start`, set the same env vars as in section A (including `ALLOWED_ORIGINS`).
 
 ---
 
